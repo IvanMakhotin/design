@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using DIContainer.Commands;
+using Ninject;
 
 namespace DIContainer
 {
@@ -18,11 +19,15 @@ namespace DIContainer
 
         static void Main(string[] args)
         {
-            var arguments = new CommandLineArgs(args);
-            var printTime = new PrintTimeCommand();
-            var timer = new TimerCommand(arguments);
-            var commands = new ICommand[] { printTime, timer };
-            new Program(arguments, commands).Run();
+            var container = new StandardKernel();
+            container.Bind<ICommand>().To<TimerCommand>();
+            container.Bind<ICommand>().To<PrintTimeCommand>();
+            container.Bind<ICommand>().To<HelpCommand>();
+
+            container.Bind<CommandLineArgs>().ToConstant(new CommandLineArgs(args));
+
+            var program = container.Get<Program>();
+            program.Run();
         }
 
         public void Run()
